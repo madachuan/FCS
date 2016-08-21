@@ -67,6 +67,7 @@
 # tgt: target
 # tmr: timer
 # ts:  TS (Time Stamp)
+# tx:  transmit
 
 # wr: write
 
@@ -288,7 +289,7 @@ task_rec
 task_rep
 
 ## function
-wr_sm(item) +-- ptl2db(item)
+wr_sm(item) +-- ptl2sm(item)
             |
             +-- intLock
             |
