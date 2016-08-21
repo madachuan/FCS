@@ -1,0 +1,305 @@
+###################################
+# Fire-Control System Hierarchy
+###################################
+
+# accs: ACCS (Air Command and Control System)
+# acqr: acquire
+
+# bs:  BS (Binary Semaphore)
+# buf: buffer
+
+# can:  CAN (Controller Area Network)
+# cdr:  It's like a primitive operation on cons cell with the same name in Lisp.
+# chk:  check
+# cmd:  command
+# com:  cluster communication port
+# comb: combine
+# ctl:  control
+
+# dcs: DCS (Display Control System)
+# drv: driver
+
+# en:   enable
+# eots: EOTS (Electro-Optical Targeting System)
+# err:  error
+
+# gd:  guide
+# gps: GPS (Global Positioning System)
+
+# init: initial
+# ir:   IR (Infrared Radiation)
+# isr:  ISR (Interrupt Service Routine)
+
+# las: laser
+# ll:  LL (Linked List)
+
+# max: maximum
+# mls: MLS (Missile Launching System)
+# mod: module
+# ms:  missile
+
+# orig: original
+# os:   OS (Operating System)
+# ot:   OT (Over Time)
+
+# pss: PSS (Power Supply System)
+# ptl: protocol
+# ptr: pointer
+# pwr: power
+
+# qry: query
+
+# rd:  read
+# rdy: ready
+# rec: record
+# rep: replay
+# rkr: rocker
+# rly: relay
+# rst: reset
+# rx:  receive
+
+# sem: semaphore
+# sm:  SM (Shared Memory)
+# srv: servo
+# sts: status
+# sw:  swivel
+
+# tgt: target
+# tmr: timer
+# ts:  TS (Time Stamp)
+
+# wr: write
+
+init +-- drv +-- rly
+     |       |   "Make sure that all relays off at initialization."
+     |       |
+     |       +-- can
+     |       |
+     |       +-- com
+     |       |
+     |       +-- tmr
+     |           "It lasts 4ms per timeslice."
+     |
+     +-- ptl
+     |   "Create a global data structure
+     |    based on the protocol of communication."
+     |
+     +-- sm
+     |   "Create a global data structure for the shared memory."
+     |
+     +-- os +-- sem --- bs_tmr
+            |
+            +-- task +-- com +-- task_gps
+                     |       |
+                     |       +-- task_accs
+                     |
+                     +-- mod +-- task_eots
+                     |       |
+                     |       +-- task_mls
+                     |
+                     +-- task_main
+                     |   "Manage all the output from fire-control system."
+                     |
+                     +-- aid +-- task_rec
+                             |
+                             +-- task_rep
+
+isr_tmr +-- counter++
+        |
+        +-- tick++
+        |
+        +-- semFlush(bs_tmr)
+
+isr_can +-- buf_can
+        |   "Create a static buffer containing the data from the port of CAN."
+        |   +-----+---------------+----------------------------------+---------+
+        |   | ext | id            | data                             | ts      |
+        |   +-----+---------------+----------------------------------+---------+
+        |   | 0   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
+        |   +-----+---+---+---+---+---+---+---+---+---+----+----+----+----+----+
+        |
+        +-- conk_can +-- init_can
+        |            |
+        |            +-- RETURN
+        |            
+        +-- drv_rx_can(buf_can)
+        |
+        +-- ts(buf_can)
+        |
+        +-- wr_sm
+
+task_gps +-- buf_gps
+         |   "Create a static buffer containing the data from the port of GPS."
+         |
+         +-- rd(buf_gps)
+         |
+         +-- err_gps --- CONTINUE
+         |
+         +-- counter = 0
+         |
+         +-- wr_sm
+
+task_accs +-- buf_accs
+          |   "Create a static buffer containing the data
+          |    from the port of ACCS."
+          |
+          +-- err_accs --- CONTINUE
+          |
+          +-- wr_sm
+
+task_eots +-- semTake(bs_tmr)
+          |
+          +-- srv
+          |   +---------+-----+--------+-------+--------+
+          |   | sts\cmd | qry | ir_rdy | sw_en | sw_rdy |
+          |   +---------+-----+--------+-------+--------+
+          |   | none    | 1   | 1      | 0     | 0      |
+          |   +---------+-----+--------+-------+--------+
+          |   | ir_self | 1   | 1      | 1     | 0      |
+          |   +---------+-----+--------+-------+--------+
+          |   | sw_hold | 1   | 1      | 1     | 1      |
+          |   +---------+-----+--------+-------+--------+
+          |   | comb    | 0   | 0      | 1     | 1      |
+          |   +---------+-----+--------+-------+--------+
+          |   | conk    | 0   | 0      | 1     | 0      |
+          |   +---------+-----+--------+-------+--------+
+          |   Here, the conk is all about servo without considering
+          |   IR's errors of graphics.
+          |
+          +-- tgt_track
+          |
+          +-- park_zone
+          |
+          +-- mode +-- orig --- rkr_ctl +-- ir_self
+                   |                    |
+                   |                    +-- sw_hold
+                   |                    |
+                   |                    +-- comb
+                   |
+                   +-- gd +-- gd_tgt
+                          |
+                          +-- gd_las
+                          |
+                          +-- miss
+
+task_mls +-- semTake(bs_tmr)
+         |
+         +-- ms
+         |   +---------+-----+------+----+------+-----+------+-----+-----+
+         |   | sts\cmd | qry | down | up | acqr | key | emit | rst | chk |
+         |   +---------+-----+------+----+------+-----+------+-----+-----+
+         |   | dumb    | 1   | 0    | 0  | 0    | 0   | 0    | 0   | 0   |
+         |   +---------+-----+------+----+------+-----+------+-----+-----+
+         |   | conk    | 1   | 0    | 0  | 0    | 0   | 0    | 1   | 0   |
+         |   +---------+-----+------+----+------+-----+------+-----+-----+
+         |   | ot      | 1   | 1    | 0  | 0    | 0   | 0    | 1   | 0   |
+         |   +---------+-----+------+----+------+-----+------+-----+-----+
+         |   | nil     | 1   | 0    | 0  | 0    | 0   | 0    | 1   | 1   |
+         |   +---------+-----+------+----+------+-----+------+-----+-----+
+         |   | be      | 0   | 1    | 1  | 0    | 0   | 0    | 1   | 1   |
+         |   +---------+-----+------+----+------+-----+------+-----+-----+
+         |   | pwr     | 0   | 1    | 1  | 1    | 0   | 0    | 0   | 0   |
+         |   +---------+-----+------+----+------+-----+------+-----+-----+
+         |   | rdy     | 0   | 0    | 1  | 1    | 1   | 0    | 0   | 0   |
+         |   +---------+-----+------+----+------+-----+------+-----+-----+
+         |   | risk    | 0   | 0    | 1  | 1    | 1   | 1    | 0   | 0   |
+         |   +---------+-----+------+----+------+-----+------+-----+-----+
+         |   | fire    | 0   | 0    | 0  | 0    | 0   | 1    | 0   | 0   |
+         |   +---------+-----+------+----+------+-----+------+-----+-----+
+         |
+         +-- ms_max +-- max <= 2
+         |          |
+         |          +-- EXAMPLE
+         |          |   +---+---+---+---+---+---+---+---+
+         |          |   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+         |          |   +---+---+---+---+---+---+---+---+
+         |          |   | x | o | x | o | o | o | x | o |
+         |          |   +---+---+---+---+---+---+---+---+
+         |          | 
+         |          |            +---+     +---+
+         |          +-- ll_max = | 2 | --> | 4 |
+         |          |            +---+     +---+
+         |          |   !!! if (ptr_emit == NODE) Can't delete the NODE !!!
+         |          |
+         |          +-- mask_max = 0101 0000 b
+         |
+         +-- emit +-- park_zone
+         |        |
+         |        +-- emit_zone
+         |        |
+         |        +-- sw_rdy
+         |        |
+         |        +-- lead_pull
+         |        |
+         |        +-- lead_in +-- keep_emit_cmd
+         |        |           |
+         |        |           +-- ptr_emit
+         |        |               +---+
+         |        |               | * |
+         |        |               +---+
+         |        |                 |
+         |        |                 v
+         |        |               +---+     +---+
+         |        |               | 2 | --> | 4 |
+         |        |               +---+     +---+
+         |        |
+         |        +-- sts +-- dumb
+         |        |       |
+         |        |       +-- conk
+         |        |       |
+         |        |       +-- ot
+         |        |       |
+         |        |       +-- nil +-- up_cdr --- wr_sm
+         |        |       |       |
+         |        |       |       +-- taskDelay(2s)
+         |        |       |
+         |        |       +-- ELSE --- CONTINUE
+         |        |
+         |        +-- stop_keep_emit_cmd
+         |        |
+         |        +-- lead_undo
+         |        |
+         |        +-- ptr_emit = NULL
+         |
+         +-- wr_sm for all missiles
+
+task_main +-- semTake(bs_tmr)
+          |
+          +-- tick % 4 +-- 0: tx_can(ir)
+          |            |
+          |            +-- 1: tx_can(sw)
+          |            |
+          |            +-- 2: tx_can(mls)
+          |            |
+          |            +-- 3: tx_can(rest) +-- tx_can(dcs1)
+          |                                |
+          |                                +-- tx_can(dcs2)
+          |                                |
+          |                                +-- tx_can(dcs3)
+          |                                |
+          |                                +-- tx_can(pss)
+          |
+          +-- tick % 1000 --- 0: tx_gps
+          |
+          +-- tick % 1000 --- 1: tx_accs
+
+task_rec
+
+task_rep
+
+## function
+wr_sm(item) +-- ptl2db(item)
+            |
+            +-- intLock
+            |
+            +-- memcpy
+            |
+            +-- intUnlock
+
+tx_can(item) +-- sm2ptl(item)
+             |
+             +-- intLock
+             |
+             +-- drv_tx_can(item)
+             |
+             +-- intUnlock
