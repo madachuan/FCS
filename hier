@@ -98,7 +98,7 @@ init +-- drv +-- rly
                      |       |
                      |       +-- task_mls
                      |
-                     +-- task_main
+                     +-- task_sync
                      |   "Manage all the output from fire-control system."
                      |
                      +-- aid +-- task_rec
@@ -264,7 +264,7 @@ task_mls +-- semTake(bs_tmr)
          |
          +-- wr_sm for all missiles
 
-task_main +-- semTake(bs_tmr)
+task_sync +-- semTake(bs_tmr)
           |
           +-- tick % 4 +-- 0: tx_can(ir)
           |            |
