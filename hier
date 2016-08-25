@@ -58,11 +58,12 @@
 # rst: reset
 # rx:  receive
 
-# sem: semaphore
-# sm:  SM (Shared Memory)
-# srv: servo
-# sts: status
-# sw:  swivel
+# sem:  semaphore
+# sm:   SM (Shared Memory)
+# srv:  servo
+# sts:  status
+# sw:   swivel
+# sync: synchronize
 
 # tgt: target
 # tmr: timer
