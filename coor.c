@@ -3,12 +3,13 @@
 
 #include "coor.h"
 
+static const double a = 6378137.0;
+static const double f = 1.0 / 298.257223565;
+static const double b = a * (1 - f);
+static const double e2 = 1 - b * b / a / a;
+
 struct coor blh2xyz(struct coor blh)
 {
-	double a = A_WGS84;
-	double f = F_WGS84;
-	double b = a * (1 - f);
-	double e2 = 1 - b * b / a / a;
 	double B = blh.x;
 	double L = blh.y;
 	double H = blh.z;
