@@ -36,6 +36,7 @@
 # max: maximum
 # mls: MLS (Missile Launching System)
 # mod: module
+# mq:  MQ (Message Queue)
 # ms:  missile
 
 # orig: original
@@ -91,7 +92,11 @@ init +-- drv +-- rly
      |
      +-- os +-- sem --- bs_tmr
             |
-            +-- task +-- com +-- task_gps
+            +-- mq --- mq_can
+            |
+            +-- task +-- task_can
+                     |
+                     +-- com +-- task_gps
                      |       |
                      |       +-- task_accs
                      |
