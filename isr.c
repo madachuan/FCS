@@ -2,6 +2,8 @@
 #include <semLib.h>
 #include <msgQLib.h>
 
+#include "isr.h"
+
 unsigned char tick;
 unsigned short counter;
 
