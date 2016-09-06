@@ -5,6 +5,10 @@
 struct ll *ll_born(void)
 {
 	struct ll *head = malloc(sizeof(struct ll));
+	if (!head) {
+		printf("The memory is not enough!");
+		exit(-1);
+	}
 	head->key = NULL;
 	head->next = NULL;
 #ifdef DUAL_LINKED_LIST
@@ -16,6 +20,10 @@ struct ll *ll_born(void)
 struct ll *cll_born(void)
 {
 	struct ll *head = malloc(sizeof(struct ll));
+	if (!head) {
+		printf("The memory is not enough!");
+		exit(-1);
+	}
 	head->key = NULL;
 	head->next = head;
 #ifdef DUAL_LINKED_LIST
@@ -29,6 +37,10 @@ struct ll *ll_ins(struct ll *head, struct ll *(*born)())
 	if (head) {
 		struct ll *tmp = head->next;
 		head->next = malloc(sizeof(struct ll));
+		if (!head->next) {
+			printf("The memory is not enough!");
+			exit(-1);
+		}
 		head->next->key = NULL;
 		head->next->next = tmp;
 #ifdef DUAL_LINKED_LIST
