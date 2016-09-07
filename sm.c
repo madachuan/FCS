@@ -11,7 +11,7 @@ struct ll *sm(void)
 	return (head);
 }
 
-void wr_sm(struct ll *p, char (*data)[], unsigned len)
+void wr_sm(struct ll *p, char *ch, char rt, char (*data)[], unsigned len)
 {
 	if (!p)
 		return;
@@ -21,6 +21,9 @@ void wr_sm(struct ll *p, char (*data)[], unsigned len)
 		free(p->key);
 	}
 	p->key = malloc(sizeof(struct item));
+	((struct item *)(p->key))->ch = ch;
+	((struct item *)(p->key))->rt = rt;
 	((struct item *)(p->key))->data = malloc(len);
 	memcpy(((struct item *)(p->key))->data, data, len);
+	((struct item *)(p->key))->ts = counter;
 }
