@@ -6,13 +6,16 @@
 
 unsigned char tick;
 unsigned short counter;
+bool int_gps;
 
 void isr_tmr(void)
 {
 	tick++;
-	counter++;
-	if (counter > 749)
-		counter = 0;
+	if (counter < 29996) {
+		counter += 4;
+		int_gps = 0;
+	} else
+		int_gps = 1;
 	semFlush(bs_tmr);
 }
 
