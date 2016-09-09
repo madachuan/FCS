@@ -7,7 +7,7 @@ SEM_ID bs_tmr;
 
 MSG_Q_ID mq_can;
 
-int_tid_can;
+int tid_can;
 int tid_gps;
 int tid_accs;
 int tid_eots;
