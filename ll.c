@@ -53,10 +53,10 @@ struct ll *ll_ins(struct ll *head, struct ll *(*born)())
 	return (born());
 }
 
-struct ll *ll_init(struct ll *head, unsigned len, struct ll *(*born)())
+struct ll *ll_init(struct ll *head, unsigned n, struct ll *(*born)())
 {
-	if (len)
-		return (ll_init(ll_ins(head, born), len - 1, born));
+	if (n)
+		return (ll_init(ll_ins(head, born), n - 1, born));
 	return (head);
 }
 
