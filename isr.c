@@ -1,7 +1,3 @@
-#include <vxWorks.h>
-#include <semLib.h>
-#include <msgQLib.h>
-
 #include "isr.h"
 
 unsigned char tick;

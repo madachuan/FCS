@@ -1,7 +1,3 @@
-#include <vxWorks.h>
-#include <msgQLib.h>
-#include <taskLib.h>
-
 #include "task_can.h"
 
 static const id[13] = {0x380A9010, 0x400A9020, 0x480A9030,

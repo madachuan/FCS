@@ -1,3 +1,7 @@
+#include <vxWorks.h>
+#include <msgQLib.h>
+#include <taskLib.h>
+
 #include "ll.h"
 #include "item.h"
 
