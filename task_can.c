@@ -24,6 +24,6 @@ void task_can(void)
 				break;
 		if (i > 12)
 			continue;
-		current = wr_sm(current, ch_can_rx[id], buf + 5, 8);
+		current = wr_sm(current, ch_can_rx[i], buf + 5, 8);
 	}
 }
