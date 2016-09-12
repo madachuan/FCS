@@ -2,6 +2,9 @@
 #include <intLib.h>
 #include <iv.h>
 
+int com1;
+int com4;
+
 void relay(unsigned char i, bool on)
 {
 	if (on)
