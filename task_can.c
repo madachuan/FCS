@@ -10,7 +10,7 @@ char *ch_can_rx[13] = {"ir_rx", "sv_rx", "m1_rx", "m2_rx", "m3_rx", "m4_rx",
 void task_can(void)
 {
 	static char buf[13];
-	while (1) {
+	for (;;) {
 		msgQReceive(mq_can, buf, 13, WAIT_FOREVER);
 		if (buf[0] != 0x88)
 			continue;
