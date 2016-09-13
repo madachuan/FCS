@@ -11,7 +11,7 @@ struct ll *sm(void)
 	return (head);
 }
 
-struct ll *wr_sm(struct ll *p, char *ch, char (*data)[], unsigned n)
+struct ll *wr_sm(struct ll *p, char *ch, char *data, unsigned n)
 {
 	if (!p)
 		return;

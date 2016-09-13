@@ -1,5 +1,5 @@
 struct item {
 	char *ch;
-	char (*data)[];
+	char *data;
 	unsigned short ts;
 };
