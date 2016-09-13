@@ -2,7 +2,6 @@
 #include <taskLib.h>
 
 #include "ll.h"
-#include "item.h"
 
 extern int tid_gps;
 extern struct ll *current;

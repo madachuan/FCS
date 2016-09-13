@@ -3,7 +3,6 @@
 #include <taskLib.h>
 
 #include "ll.h"
-#include "item.h"
 
 extern MSG_Q_ID mq_can;
 extern int tid_can;
