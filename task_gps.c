@@ -1,6 +1,25 @@
+#include <stdlib.h>
 #include <string.h>
 
 #include "task_gps.h"
+
+char *rd_comma(char *data, unsigned n)
+{
+	if (!n)
+		return (data);
+	char *tmp = strchr(data, ',');
+	if (tmp)
+		return (rd_comma(tmp + 1, n - 1));
+	return (rd_comma(tmp + 1, n));
+}
+
+double rd_gps(char *data, unsigned n)
+{
+	char buf[256];
+	strcpy(buf, rd_comma(data, n));
+	*rd_comma(buf, 1) = 0;
+	return (atof(buf));
+}
 
 void task_gps(void)
 {
@@ -39,6 +58,7 @@ void task_gps(void)
 				goto CLEAN;
 		else
 			goto CLEAN;
+		counter = (rd_gps(2) - (int)rd_gps(2)) * 1000;
 		memcpy(buf, pre, 256);
 		current = wr_sm(current, "gps_rx", buf, 256);
 CLEAN:
