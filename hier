@@ -23,6 +23,8 @@
 # eots: EOTS (Electro-Optical Targeting System)
 # err:  error
 
+# flt:  fault
+
 # gd:  guide
 # gps: GPS (Global Positioning System)
 
@@ -63,7 +65,7 @@
 # sm:   SM (Shared Memory)
 # srv:  servo
 # sts:  status
-# sw:   swivel
+# sv:   swivel
 # sync: synchronize
 
 # tgt: target
@@ -83,10 +85,6 @@ init +-- drv +-- rly
      |       +-- tmr
      |           "It lasts 4ms per timeslice."
      |
-     +-- ptl
-     |   "Create a global data structure
-     |    based on the protocol of communication."
-     |
      +-- sm
      |   "Create a global data structure for the shared memory."
      |
@@ -105,50 +103,81 @@ init +-- drv +-- rly
                      |       +-- task_mls
                      |
                      +-- task_sync
-                     |   "Manage all the output from fire-control system."
+                     |   "Manage all the output of the fire-control system."
                      |
                      +-- aid +-- task_rec
                              |
                              +-- task_rep
 
-isr_tmr +-- counter++
+isr_tmr +-- tick++
         |
-        +-- tick++
+        +-- counter++
         |
         +-- semFlush(bs_tmr)
 
-isr_can +-- buf_can
-        |   "Create a static buffer containing the data from the port of CAN."
-        |   +-----+---------------+----------------------------------+---------+
-        |   | ext | id            | data                             | ts      |
-        |   +-----+---------------+----------------------------------+---------+
-        |   | 0   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
-        |   +-----+---+---+---+---+---+---+---+---+---+----+----+----+----+----+
+isr_can +-- buf
+        |   +-----+---------------+----------------------------------+
+        |   | ext | id            | data                             |
+        |   +-----+---------------+----------------------------------+
+        |   | 0   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+        |   +-----+---------------+----------------------------------+
         |
-        +-- conk_can +-- init_can
-        |            |
-        |            +-- RETURN
+        +-- err_can +-- init_can
+        |           |
+        |           +-- RETURN
         |            
-        +-- drv_rx_can(buf_can)
+        +-- drv_rx_can(buf)
         |
-        +-- ts(buf_can)
-        |
-        +-- wr_sm
+        +-- msgQSend(mq_can, buf)
 
-task_gps +-- buf_gps
-         |   "Create a static buffer containing the data from the port of GPS."
+sm +-- The shared memory is a huge dual circular linked list like this:
+   |     7--8--9
+   |    /       \
+   |   6         10 == current
+   |   |         |
+   |   5         1
+   |    \       /
+   |     4--3--2
+   |
+   +-- When there is a new item, it will make current = current->next,
+   |   and connect the new item with the current node's key.
+   |     7--8--9
+   |    /       \
+   |   6         10
+   |   |         |
+   |   5         11 == current
+   |    \       /
+   |     4--3--2
+   |
+   +-- RETURN (current)
+
+task_can +-- buf
+         |   "Create a static buffer containing the data from the port of CAN."
          |
-         +-- rd(buf_gps)
+         +-- msgQReceive(mq_can, buf)
          |
-         +-- err_gps --- CONTINUE
+         +-- err_ext --- CONTINUE
          |
-         +-- counter = 0
+         +-- id2ch
          |
          +-- wr_sm
 
-task_accs +-- buf_accs
+task_gps +-- buf
+         |   "Create a static buffer containing the data from the port of GPS."
+         |
+         +-- rd(buf)
+         |
+         +-- err_gps --- CONTINUE
+         |
+         +-- new_counter
+         |
+         +-- wr_sm
+
+task_accs +-- buf
           |   "Create a static buffer containing the data
           |    from the port of ACCS."
+          |
+          +-- rd(buf)
           |
           +-- err_accs --- CONTINUE
           |
@@ -158,19 +187,19 @@ task_eots +-- semTake(bs_tmr)
           |
           +-- srv
           |   +---------+-----+--------+-------+--------+
-          |   | sts\cmd | qry | ir_rdy | sw_en | sw_rdy |
+          |   | sts\cmd | qry | ir_rdy | sv_en | sv_rdy |
           |   +---------+-----+--------+-------+--------+
           |   | none    | 1   | 1      | 0     | 0      |
           |   +---------+-----+--------+-------+--------+
           |   | ir_self | 1   | 1      | 1     | 0      |
           |   +---------+-----+--------+-------+--------+
-          |   | sw_hold | 1   | 1      | 1     | 1      |
+          |   | sv_hold | 1   | 1      | 1     | 1      |
           |   +---------+-----+--------+-------+--------+
           |   | comb    | 0   | 0      | 1     | 1      |
           |   +---------+-----+--------+-------+--------+
-          |   | conk    | 0   | 0      | 1     | 0      |
+          |   | flt     | 0   | 0      | 1     | 0      |
           |   +---------+-----+--------+-------+--------+
-          |   Here, the conk is all about servo without considering
+          |   Here, the faults are all about servo without
           |   IR's errors of graphics.
           |
           +-- tgt_track
@@ -179,7 +208,7 @@ task_eots +-- semTake(bs_tmr)
           |
           +-- mode +-- orig --- rkr_ctl +-- ir_self
                    |                    |
-                   |                    +-- sw_hold
+                   |                    +-- sv_hold
                    |                    |
                    |                    +-- comb
                    |
@@ -197,7 +226,7 @@ task_mls +-- semTake(bs_tmr)
          |   +---------+-----+------+----+------+-----+------+-----+-----+
          |   | dumb    | 1   | 0    | 0  | 0    | 0   | 0    | 0   | 0   |
          |   +---------+-----+------+----+------+-----+------+-----+-----+
-         |   | conk    | 1   | 0    | 0  | 0    | 0   | 0    | 1   | 0   |
+         |   | flt     | 1   | 0    | 0  | 0    | 0   | 0    | 1   | 0   |
          |   +---------+-----+------+----+------+-----+------+-----+-----+
          |   | ot      | 1   | 1    | 0  | 0    | 0   | 0    | 1   | 0   |
          |   +---------+-----+------+----+------+-----+------+-----+-----+
@@ -234,7 +263,7 @@ task_mls +-- semTake(bs_tmr)
          |        |
          |        +-- emit_zone
          |        |
-         |        +-- sw_rdy
+         |        +-- sv_rdy
          |        |
          |        +-- lead_pull
          |        |
@@ -252,7 +281,7 @@ task_mls +-- semTake(bs_tmr)
          |        |
          |        +-- sts +-- dumb
          |        |       |
-         |        |       +-- conk
+         |        |       +-- flt
          |        |       |
          |        |       +-- ot
          |        |       |
@@ -274,7 +303,7 @@ task_sync +-- semTake(bs_tmr)
           |
           +-- tick % 4 +-- 0: tx_can(ir)
           |            |
-          |            +-- 1: tx_can(sw)
+          |            +-- 1: tx_can(sv)
           |            |
           |            +-- 2: tx_can(mls)
           |            |
@@ -295,18 +324,24 @@ task_rec
 task_rep
 
 ## function
-wr_sm(item) +-- ptl2sm(item)
-            |
-            +-- intLock
-            |
-            +-- memcpy
-            |
-            +-- intUnlock
-
-tx_can(item) +-- sm2ptl(item)
-             |
-             +-- intLock
-             |
-             +-- drv_tx_can(item)
-             |
-             +-- intUnlock
+item(buf, len) +-- malloc(sizeof(item))
+               |
+               +-- data = malloc(len)
+               |
+               +-- memcpy(data, buf, len)
+               |   +--------+-----+------+---------+
+               |   | ch     | rt  | data | ts      |
+               |   +--------+-----+------+---------+
+               |   | "can1" | 'r' |  *   | counter |
+               |   +--------+-----+------+---------+
+               |                     |
+               |     +---------------+
+               |     |
+               |     v
+               |   +---------------+----------------------------------+
+               |   | id            | data                             |
+               |   +---------------+----------------------------------+
+               |   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+               |   +---------------+----------------------------------+
+               |
+               +--- RETURN (item)
