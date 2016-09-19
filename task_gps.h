@@ -9,4 +9,4 @@ extern unsigned short counter;
 extern int com4;
 
 struct ll *wr_sm(struct ll *p, char *ch, char *data, unsigned n);
-unsigned char chk_xor(unsigned char *p, unsigned n);
+char chk_xor(char *p, unsigned n);
