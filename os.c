@@ -17,7 +17,7 @@ int tid_sync;
 void os(void)
 {
 	bs_tmr = semBCreate(SEM_EMPTY, SEM_Q_PRIORITY);
-	mq_can = msgQCreate(1, 13, MSG_Q_FIFO);
+	mq_can = msgQCreate(1, 13, MSG_Q_PRIORITY);
 	tid_can = taskSpawn("can", 100, VX_FP_TASK, 10000, (FUNCPTR)task_can,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	tid_gps = taskSpawn("gps", 110, VX_FP_TASK, 10000, (FUNCPTR)task_gps,
