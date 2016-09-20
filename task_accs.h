@@ -3,7 +3,6 @@
 
 #include "ll.h"
 
-extern int tid_accs;
 extern struct ll *current;
 extern int com1;
 

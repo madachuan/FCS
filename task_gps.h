@@ -3,7 +3,6 @@
 
 #include "ll.h"
 
-extern int tid_gps;
 extern struct ll *current;
 extern unsigned short counter;
 extern int com4;
