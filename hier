@@ -111,7 +111,7 @@ init +-- drv +-- rly
 
 isr_tmr +-- tick++
         |
-        +-- counter++
+        +-- counter + 4
         |
         +-- semFlush(bs_tmr)
 
@@ -316,9 +316,9 @@ task_sync +-- semTake(bs_tmr)
           |                                |
           |                                +-- tx_can(pss)
           |
-          +-- tick % 1000 --- 0: tx_gps
+          +-- tick % 250 --- 0: tx_gps
           |
-          +-- tick % 1000 --- 1: tx_accs
+          +-- tick % 250 --- 1: tx_accs
 
 task_rec
 
