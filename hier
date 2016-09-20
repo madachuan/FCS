@@ -116,6 +116,7 @@ isr_tmr +-- tick++
         +-- semFlush(bs_tmr)
 
 isr_can +-- buf
+        |   "Create a static buffer containing the data from the port of CAN."
         |   +-----+---------------+----------------------------------+
         |   | ext | id            | data                             |
         |   +-----+---------------+----------------------------------+
@@ -152,7 +153,7 @@ sm +-- The shared memory is a huge dual circular linked list like this:
    +-- RETURN (current)
 
 task_can +-- buf
-         |   "Create a static buffer containing the data from the port of CAN."
+         |   "Create a static buffer containing the data from ISR of CAN."
          |
          +-- msgQReceive(mq_can, buf)
          |
