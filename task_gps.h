@@ -4,7 +4,7 @@
 #include "ll.h"
 
 extern struct ll *current;
-extern unsigned short counter;
+extern unsigned counter;
 extern int com4;
 
 struct ll *wr_sm(struct ll *p, char *ch, char *data, unsigned n);

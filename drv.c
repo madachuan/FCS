@@ -5,7 +5,7 @@
 int com1;
 int com4;
 
-void relay(unsigned char i, bool on)
+void relay(unsigned i, bool on)
 {
 	if (on)
 		openJDQ(i + 1);
@@ -15,7 +15,7 @@ void relay(unsigned char i, bool on)
 
 void rly(void)
 {
-	unsigned char i;
+	unsigned i;
 	for (i = 0; i < 10; i++)
 		relay(i, 0);
 }

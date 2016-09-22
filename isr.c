@@ -1,7 +1,7 @@
 #include "isr.h"
 
-unsigned char tick;
-unsigned short counter;
+unsigned tick;
+unsigned counter;
 bool int_gps;
 
 void isr_tmr(void)
