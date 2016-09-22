@@ -14,8 +14,7 @@ void task_can(void)
 		msgQReceive(mq_can, buf, 13, WAIT_FOREVER);
 		if (buf[0] != 0x88)
 			continue;
-		unsigned i;
-		for (i = 0; i < 13; i++)
+		for (unsigned i = 0; i < 13; i++)
 			if (*(unsigned *)(buf + 1) == id[i])
 				break;
 		if (i > 12)

@@ -15,8 +15,7 @@ void relay(unsigned i, bool on)
 
 void rly(void)
 {
-	unsigned i;
-	for (i = 0; i < 10; i++)
+	for (unsigned i = 0; i < 10; i++)
 		relay(i, 0);
 }
 
