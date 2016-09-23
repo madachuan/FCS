@@ -1,11 +1,11 @@
 #include "task_can.h"
 
+char *ch_can_rx[13] = {"ir_rx", "sv_rx", "m1_rx", "m2_rx", "m3_rx", "m4_rx",
+	"m5_rx", "m6_rx", "m7_rx", "m8_rx", "d1_rx", "d2_rx", "d3_rx"};
+
 static const id[13] = {0x380A9010, 0x400A9020, 0x480A9030,
 	0x500A9040, 0x580A9050, 0x600A9060, 0x680A9070, 0x700A9080,
 	0x780A9090, 0x800A90A0, 0x880AC0B0, 0x900A80B0, 0x980A80B0};
-
-char *ch_can_rx[13] = {"ir_rx", "sv_rx", "m1_rx", "m2_rx", "m3_rx", "m4_rx",
-	"m5_rx", "m6_rx", "m7_rx", "m8_rx", "d1_rx", "d2_rx", "d3_rx"};
 
 unsigned id_can_rx(char *buf, unsigned n)
 {
