@@ -9,7 +9,7 @@ static const id[13] = {0x380A9010, 0x400A9020, 0x480A9030,
 
 unsigned id_can_rx(char *buf, unsigned n)
 {
-	if (n < 1 || *(unsigned *)(buf + 1) == id[n - 1])
+	if (n < 1 || *(int *)(buf + 1) == id[n - 1])
 		return (n);
 	return (id_can_rx(buf, n - 1));
 }
