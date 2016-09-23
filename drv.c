@@ -8,15 +8,17 @@ int com4;
 void relay(unsigned i, bool on)
 {
 	if (on)
-		openJDQ(i + 1);
+		openJDQ(i);
 	else
-		closeJDQ(i + 1);
+		closeJDQ(i);
 }
 
-void rly(void)
+void rly(unsigned n)
 {
-	for (unsigned i = 0; i < 10; i++)
-		relay(i, 0);
+	if (n < 1)
+		return;
+	relay(n, 0);
+	rly(n - 1);
 }
 
 void can(void)
@@ -50,7 +52,7 @@ void tmr(void)
 
 void drv(void)
 {
-	rly();
+	rly(10);
 	can();
 	com();
 	tmr();
