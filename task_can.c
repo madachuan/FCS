@@ -7,6 +7,13 @@ static const id[13] = {0x380A9010, 0x400A9020, 0x480A9030,
 char *ch_can_rx[13] = {"ir_rx", "sv_rx", "m1_rx", "m2_rx", "m3_rx", "m4_rx",
 	"m5_rx", "m6_rx", "m7_rx", "m8_rx", "d1_rx", "d2_rx", "d3_rx"};
 
+unsigned id_can_rx(char *buf, unsigned n)
+{
+	if (n < 1 || *(unsigned *)(buf + 1) == id[n - 1])
+		return (n);
+	return (id_can_rx(buf, n - 1));
+}
+
 void task_can(void)
 {
 	static char buf[13];
@@ -14,10 +21,8 @@ void task_can(void)
 		msgQReceive(mq_can, buf, 13, WAIT_FOREVER);
 		if (buf[0] != 0x88)
 			continue;
-		for (unsigned i = 0; i < 13; i++)
-			if (*(unsigned *)(buf + 1) == id[i])
-				break;
-		if (i > 12)
+		unsigned i = id_can_rx(buf, 13);
+		if (i < 1)
 			continue;
 		current = wr_sm(current, ch_can_rx[i], buf + 5, 8);
 	}
