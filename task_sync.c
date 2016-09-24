@@ -1,3 +1,5 @@
+#include <ioLib.h>
+
 #include "task_sync.h"
 
 char *ch_tx[8] = {"ir_tx", "sv_tx", "mls_tx",
