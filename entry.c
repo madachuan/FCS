@@ -1,3 +1,4 @@
+#include "ll.h"
 #include "entry.h"
 
 struct ll *current;

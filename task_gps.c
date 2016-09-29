@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <vxWorks.h>
+#include <taskLib.h>
+
+#include "ll.h"
 #include "task_gps.h"
 
 char *rd_comma(char *data, unsigned n)

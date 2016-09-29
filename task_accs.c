@@ -1,5 +1,9 @@
 #include <string.h>
 
+#include <vxWorks.h>
+#include <taskLib.h>
+
+#include "ll.h"
 #include "task_accs.h"
 
 void task_accs(void)

@@ -1,5 +1,9 @@
+#include <vxWorks.h>
+#include <taskLib.h>
+#include <semLib.h>
 #include <ioLib.h>
 
+#include "ll.h"
 #include "task_sync.h"
 
 char *ch_tx[8] = {"ir_tx", "sv_tx", "mls_tx",

@@ -1,3 +1,8 @@
+#include <vxWorks.h>
+#include <msgQLib.h>
+#include <taskLib.h>
+
+#include "ll.h"
 #include "task_can.h"
 
 char *ch_can_rx[13] = {"ir_rx", "sv_rx", "m1_rx", "m2_rx", "m3_rx", "m4_rx",

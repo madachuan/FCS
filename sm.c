@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ll.h"
+#include "item.h"
 #include "sm.h"
 
 static const unsigned max = 10000;

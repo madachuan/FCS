@@ -1,8 +1,3 @@
-#include <vxWorks.h>
-#include <taskLib.h>
-
-#include "ll.h"
-
 extern struct ll *current;
 extern unsigned counter;
 extern int com4;

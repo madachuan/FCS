@@ -1,9 +1,3 @@
-#include <vxWorks.h>
-#include <taskLib.h>
-#include <semLib.h>
-
-#include "ll.h"
-
 extern SEM_ID bs_tmr;
 extern struct ll *current;
 extern unsigned tick;

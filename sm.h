@@ -1,6 +1,3 @@
-#include "ll.h"
-#include "item.h"
-
 extern unsigned counter;
 
 struct ll *cll_born(void);
